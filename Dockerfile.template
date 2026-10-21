@@ -1,0 +1,11 @@
+# Dockerfile.template
+FROM [base-image]
+
+WORKDIR /app
+
+# Add your build steps
+COPY . .
+
+EXPOSE 3000
+
+CMD ["start-command"]
