@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, model_validator
 __all__ = [
     "ChemicalIdentity",
     "MaterialComponent",
+    "MaterialSpec",
 ]
 
 class ChemicalIdentity(BaseModel):
@@ -37,7 +38,7 @@ class ChemicalIdentity(BaseModel):
         synonyms (list[str]):
             A list of synonyms for the chemical.
     """
-    cas_rn: str | None
+    cas_rn: str | None = None
     name: str | None = None
     formula: str | None = None
     molecular_weight: float | None = None
