@@ -8,11 +8,11 @@ from pydantic import BaseModel, Field
 from material_scaleup.models.assessment import AssessmentCategory
 
 __all__ = [
-    "Source",
+    "EvidenceSource",
     "Evidence",
 ]
 
-class Source(BaseModel):
+class EvidenceSource(BaseModel):
     """
     Source from which a piece of evidence was obtained.
     
@@ -47,7 +47,7 @@ class Evidence(BaseModel):
         units (str | None):
             The units of the value, if applicable.
 
-        source (Source):
+        source (EvidenceSource):
             The source from which the evidence was obtained.
 
         metadata (dict[str, str | int | float | bool | None]):
@@ -57,7 +57,7 @@ class Evidence(BaseModel):
     claim: str
     value: str | int | float | bool | None = None
     units: str | None = None
-    source: Source
+    source: EvidenceSource
     metadata: dict[str, str | int | float | bool | None] = Field(
         default_factory=dict
     )

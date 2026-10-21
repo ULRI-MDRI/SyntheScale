@@ -7,7 +7,7 @@ from enum import StrEnum
 
 __all__ = [
     "AssessmentCategory",
-    "Source",
+    "AssessmentSource",
     "RiskAssessment",
     "ScaleUpAssessment",
 ]
@@ -20,7 +20,7 @@ class AssessmentCategory(StrEnum):
     SAFETY = "safety"
     REGULATORY = "regulatory"
 
-class Source(BaseModel):
+class AssessmentSource(BaseModel):
     """
     Represents the source of information for an assessment.
 
@@ -52,13 +52,13 @@ class RiskAssessment(BaseModel):
         evidence (list[str]):
             A list of evidence supporting the assessment.
 
-        sources (list[Source]):
+        sources (list[AssessmentSource]):
             A list of sources for the assessment.
     """
     score: float | None = Field(default=None, ge=0, le=100)
     summary: str
     evidence: list[str] = Field(default_factory=list)
-    sources: list[Source] = Field(default_factory=list)
+    sources: list[AssessmentSource] = Field(default_factory=list)
 
 class ScaleUpAssessment(BaseModel):
     """
