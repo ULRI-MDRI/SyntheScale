@@ -1,4 +1,4 @@
-# Material Scaleup
+# SyntheScale
 
 ## Goal
 
