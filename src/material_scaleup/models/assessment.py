@@ -3,11 +3,22 @@
 
 from pydantic import BaseModel, Field
 
+from enum import StrEnum
+
 __all__ = [
+    "AssessmentCategory",
     "Source",
     "RiskAssessment",
     "ScaleUpAssessment",
 ]
+
+class AssessmentCategory(StrEnum):
+    AVAILABILITY = "availability"
+    COST = "cost"
+    MARKET_VOLATILITY = "market_volatility"
+    SUPPLY_CHAIN = "supply_chain"
+    SAFETY = "safety"
+    REGULATORY = "regulatory"
 
 class Source(BaseModel):
     """

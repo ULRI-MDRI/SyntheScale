@@ -18,6 +18,31 @@ to produce transparent, source-grounded feasibility assessments.
 - Distinguish unavailable information from low-risk information.
 - Keep external data providers independent of the domain model.
 
+Proposed architecture:
+
+CAS RN
+  │
+  ▼
+ChemicalIdentity
+  │
+  ├───────────────┐
+  ▼               ▼
+provider A     provider B  ...
+  │               │
+  └──── Evidence ─┘
+          │
+          ▼
+ AssessmentContext
+          │
+       ┌──┴──┐
+       │     │
+       ▼     ▼
+   scoring   LLM
+       │     │
+       └──┬──┘
+          ▼
+ ScaleUpAssessment
+
 ## Quick Start
 
 1. Clone the repository

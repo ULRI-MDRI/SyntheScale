@@ -5,6 +5,13 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from material_scaleup.models.assessment import AssessmentCategory
+
+__all__ = [
+    "Source",
+    "Evidence",
+]
+
 class Source(BaseModel):
     """
     Source from which a piece of evidence was obtained.
@@ -28,7 +35,7 @@ class Evidence(BaseModel):
     A source-grounded fact used in a scale-up assessment.
     
     Attributes:
-        category (str):
+        category (AssessmentCategory):
             The category of the evidence.
 
         claim (str):
@@ -46,7 +53,7 @@ class Evidence(BaseModel):
         metadata (dict[str, str | int | float | bool | None]):
             Additional metadata related to the evidence.
     """
-    category: str
+    category: AssessmentCategory
     claim: str
     value: str | int | float | bool | None = None
     units: str | None = None
