@@ -1,0 +1,67 @@
+Metadata-Version: 2.4
+Name: material-scaleup
+Version: 0.1.0
+Summary: AI-assisted assessment of scale-up feasibility for novel materials.
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+Requires-Dist: pydantic<3.0,>=2.0
+Requires-Dist: requests<3.0,>=2.31
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-cov>=5.0; extra == "dev"
+Requires-Dist: ruff>=0.8; extra == "dev"
+
+# Material Scaleup
+
+## Goal
+
+Material Scaleup assesses the potential scale-up feasibility of novel
+materials using chemical, economic, supply-chain, safety, and regulatory
+information.
+
+The system combines authoritative data sources with AI-assisted analysis
+to produce transparent, source-grounded feasibility assessments.
+
+## Design principles
+
+- Prefer authoritative structured data over LLM knowledge.
+- Preserve the source of every retrieved fact.
+- Use deterministic calculations where possible.
+- Use LLMs for interpretation and synthesis, not as databases.
+- Distinguish unavailable information from low-risk information.
+- Keep external data providers independent of the domain model.
+
+## Quick Start
+
+1. Clone the repository
+2. Copy `.env.example` to `.env` and configure
+3. [Stack-specific setup instructions]
+4. Run the application
+
+## Development
+
+### Prerequisites
+- [List requirements]
+
+### Installation
+\`\`\`bash
+# Installation steps
+\`\`\`
+
+### Running
+\`\`\`bash
+# Run commands
+\`\`\`
+
+## Project Structure
+\`\`\`
+├── src/          # Source code
+├── tests/        # Tests
+└── docs/         # Documentation
+\`\`\`
+
+## Contributing
+See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## License
+[Your License]
