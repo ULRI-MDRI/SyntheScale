@@ -1,4 +1,3 @@
-
 # src/material_scaleup/models/categories.py
 
 from enum import StrEnum
@@ -10,6 +9,7 @@ __all__ = [
     "Priority",
     "RouteOrigin",
 ]
+
 
 class AssessmentCategory(StrEnum):
     """
@@ -28,6 +28,7 @@ class AssessmentCategory(StrEnum):
         - WASTE
         - ETHICAL
     """
+
     AVAILABILITY = "availability"
     COST = "cost"
     MARKET_VOLATILITY = "market_volatility"
@@ -40,55 +41,62 @@ class AssessmentCategory(StrEnum):
     WASTE = "waste"
     ETHICAL = "ethical"
 
+
 class AssessmentStatus(StrEnum):
     """
     Status describing whether an assessment could be completed.
-    
+
     Categories:
         - ASSESSED
         - INSUFFICIENT_DATA
         - NOT_APPLICABLE
         - ERROR
     """
+
     ASSESSED = "assessed"
     INSUFFICIENT_DATA = "insufficient_data"
     NOT_APPLICABLE = "not_applicable"
     ERROR = "error"
 
+
 class EvidenceStatus(StrEnum):
     """
     Status describing the outcome of an evidence lookup.
-    
+
     Categories:
         - AVAILABLE
         - NOT_FOUND
         - NOT_APPLICABLE
         - ERROR
     """
+
     AVAILABLE = "available"
     NOT_FOUND = "not_found"
     NOT_APPLICABLE = "not_applicable"
     ERROR = "error"
 
+
 class Priority(StrEnum):
     """
     Priority assigned to a recommended validation action.
-    
+
     Categories:
         - LOW
         - MEDIUM
         - HIGH
         - CRITICAL
     """
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 class RouteOrigin(StrEnum):
     """
     Origin of a synthesis route.
-    
+
     Categories:
         - USER_PROVIDED
         - EXPERIMENTAL
@@ -97,6 +105,7 @@ class RouteOrigin(StrEnum):
         - AI_PROPOSED
         - UNKNOWN
     """
+
     USER_PROVIDED = "user_provided"
     EXPERIMENTAL = "experimental"
     LITERATURE = "literature"

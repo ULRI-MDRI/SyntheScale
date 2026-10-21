@@ -1,4 +1,3 @@
-
 # src/material_scaleup/providers/base.py
 
 from abc import ABC, abstractmethod
@@ -12,13 +11,15 @@ __all__ = [
     "EvidenceProvider",
 ]
 
+
 class ChemicalIdentityProvider(ABC):
     """Provider capable of resolving chemical identity information."""
+
     @abstractmethod
     def get_by_cas_rn(self, cas_rn: str) -> ChemicalIdentity:
         """
         Resolve a chemical using a CAS Registry Number.
-        
+
         Args:
             cas_rn (str):
                 The CAS Registry Number of the chemical to resolve.
@@ -37,7 +38,7 @@ class ChemicalIdentityProvider(ABC):
     def get_by_name(self, name: str) -> ChemicalIdentity:
         """
         Resolve a chemical using its common name.
-        
+
         Args:
             name (str):
                 The common name of the chemical to resolve.
@@ -56,7 +57,7 @@ class ChemicalIdentityProvider(ABC):
     def get_by_smiles(self, smiles: str) -> ChemicalIdentity:
         """
         Resolve a chemical using its SMILES representation.
-        
+
         Args:
             smiles (str):
                 The SMILES representation of the chemical to resolve.
@@ -71,8 +72,10 @@ class ChemicalIdentityProvider(ABC):
         """
         raise NotImplementedError
 
+
 class EvidenceProvider(ABC):
     """Provider capable of retrieving scale-up evidence."""
+
     @abstractmethod
     def get_evidence(
         self,
@@ -80,7 +83,7 @@ class EvidenceProvider(ABC):
     ) -> list[Evidence]:
         """
         Retrieve evidence relevant to a scale-up scenario.
-        
+
         Args:
             scenario (ScaleUpScenario):
                 The scale-up scenario for which to retrieve evidence.
@@ -94,4 +97,3 @@ class EvidenceProvider(ABC):
                 If the method is not implemented by the provider.
         """
         raise NotImplementedError
-    

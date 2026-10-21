@@ -1,4 +1,3 @@
-
 # src/material_scaleup/models/evidence.py
 
 from datetime import date
@@ -17,10 +16,11 @@ __all__ = [
     "EvidenceValue",
 ]
 
+
 class EvidenceValue(BaseModel):
     """
     A typed value reported by a source.
-    
+
     Attributes:
         value (str | int | float | bool):
             The value reported by the source.
@@ -28,13 +28,15 @@ class EvidenceValue(BaseModel):
         units (str | None):
             The units of the value, if applicable.
     """
+
     value: str | int | float | bool
     units: str | None = None
+
 
 class EvidenceScope(BaseModel):
     """
     Geographic, temporal, and market scope of a piece of evidence.
-    
+
     Attributes:
         country (str | None):
             The country relevant to the evidence.
@@ -57,6 +59,7 @@ class EvidenceScope(BaseModel):
         scale_basis (str | None):
             The scale context for the evidence.
     """
+
     country: str | None = None
     region: str | None = None
     effective_date: date | None = None
@@ -65,10 +68,11 @@ class EvidenceScope(BaseModel):
     market_basis: str | None = None
     scale_basis: str | None = None
 
+
 class Evidence(BaseModel):
     """
     A source-grounded fact used in a scale-up assessment.
-    
+
     Attributes:
         category (AssessmentCategory):
             The category of the evidence.
@@ -97,6 +101,7 @@ class Evidence(BaseModel):
         metadata (dict[str, str | int | float | bool | None]):
             Additional metadata associated with the evidence.
     """
+
     category: AssessmentCategory
     claim: str
     status: EvidenceStatus = EvidenceStatus.AVAILABLE
@@ -115,9 +120,6 @@ class Evidence(BaseModel):
         """Require a source when evidence is reported as available."""
 
         if self.status == EvidenceStatus.AVAILABLE and self.source is None:
-            raise ValueError(
-                "Available evidence must identify its source."
-            )
+            raise ValueError("Available evidence must identify its source.")
 
         return self
-    

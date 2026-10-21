@@ -1,4 +1,3 @@
-
 # tests/providers/test_pubchem.py
 
 import pytest
@@ -32,6 +31,7 @@ def test_pubchem_resolves_common_raw_materials(
     assert chemical.formula == expected_formula
     assert chemical.inchikey is not None
     assert chemical.canonical_smiles is not None
+    assert chemical.pubchem_cid is not None
 
 
 @pytest.mark.integration
@@ -42,6 +42,7 @@ def test_pubchem_resolves_by_cas_rn(
 
     assert chemical.formula == "HNaO"
     assert chemical.cas_rn == "1310-73-2"
+    assert chemical.pubchem_cid == 14798
     assert chemical.inchikey == "HEMHJVSKTPXQMS-UHFFFAOYSA-M"
 
 

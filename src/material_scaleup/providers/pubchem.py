@@ -1,4 +1,3 @@
-
 # src/material_scaleup/providers/pubchem.py
 
 from urllib.parse import quote
@@ -7,6 +6,7 @@ import requests
 
 from material_scaleup.models.chemical import ChemicalIdentity
 from material_scaleup.providers.base import ChemicalIdentityProvider
+
 
 class PubChemProvider(ChemicalIdentityProvider):
     """Resolve chemical identities using PubChem PUG REST."""
@@ -35,7 +35,8 @@ class PubChemProvider(ChemicalIdentityProvider):
     def get_by_cas_rn(self, cas_rn: str) -> ChemicalIdentity:
         return self._get_by_identifier(namespace="name", identifier=cas_rn)
 
-    def _get_by_identifier(self,
+    def _get_by_identifier(
+        self,
         namespace: str,
         identifier: str,
     ) -> ChemicalIdentity:
@@ -59,6 +60,7 @@ class PubChemProvider(ChemicalIdentityProvider):
         record = properties[0]
 
         return ChemicalIdentity(
+            pubchem_cid=record.get("CID"),
             cas_rn=self._infer_cas_rn(identifier),
             name=identifier if namespace == "name" else None,
             formula=record.get("MolecularFormula"),
@@ -82,5 +84,4 @@ class PubChemProvider(ChemicalIdentityProvider):
         if value is None:
             return None
 
-        return float(value) # pyright: ignore[reportArgumentType]
-    
+        return float(value)  # pyright: ignore[reportArgumentType]

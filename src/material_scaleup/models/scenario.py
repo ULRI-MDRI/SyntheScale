@@ -1,4 +1,3 @@
-
 # src/material_scaleup/models/scenario.py
 
 from pydantic import BaseModel, Field, model_validator
@@ -16,10 +15,11 @@ __all__ = [
     "SynthesisRoute",
 ]
 
+
 class LocationSpec(BaseModel):
     """
     Location in which production is being considered.
-    
+
     At least one of country, region, or locality must be specified.
 
     Attributes:
@@ -32,6 +32,7 @@ class LocationSpec(BaseModel):
         locality (str | None):
             Locality in which production is being considered.
     """
+
     country: str | None = None
     region: str | None = None
     locality: str | None = None
@@ -43,10 +44,11 @@ class LocationSpec(BaseModel):
 
         return self
 
+
 class ApplicationSpec(BaseModel):
     """
     Intended application and its relevant requirements.
-    
+
     Attributes:
         name (str):
             Name of the intended application.
@@ -57,14 +59,16 @@ class ApplicationSpec(BaseModel):
         requirements (list[str]):
             List of specific requirements for the application.
     """
+
     name: str
     description: str | None = None
     requirements: list[str] = Field(default_factory=list)
 
+
 class ProductionTarget(BaseModel):
     """
     Target production quantity and time basis.
-    
+
     Attributes:
         amount (float):
             Target production amount. Must be greater than 0.
@@ -78,15 +82,17 @@ class ProductionTarget(BaseModel):
         batches_per_period (int | None):
             Number of batches per period. Must be at least 1 if specified.
     """
+
     amount: float = Field(gt=0)
     units: str
     period: str | None = None
     batches_per_period: int | None = Field(default=None, ge=1)
 
+
 class ProcessInput(BaseModel):
     """
     Chemical, solvent, reagent, utility, or other process input.
-    
+
     Attributes:
         chemical (ChemicalIdentity):
             Identity of the chemical input.
@@ -110,6 +116,7 @@ class ProcessInput(BaseModel):
         recoverable (bool | None):
             Indicates if the input is recoverable.
     """
+
     chemical: ChemicalIdentity
     role: str | None = None
     amount: float | None = Field(default=None, ge=0)
@@ -118,10 +125,11 @@ class ProcessInput(BaseModel):
     purity: float | None = Field(default=None, gt=0, le=1)
     recoverable: bool | None = None
 
+
 class ProcessStep(BaseModel):
     """
     An individual operation in a synthesis or production route.
-    
+
     Attributes:
         name (str):
             Name of the process step.
@@ -163,6 +171,7 @@ class ProcessStep(BaseModel):
             Expected yield of the process step. Must be between 0 and 1 if
             specified.
     """
+
     name: str
     description: str | None = None
     operation: str | None = None
@@ -177,10 +186,11 @@ class ProcessStep(BaseModel):
     inputs: list[ProcessInput] = Field(default_factory=list)
     expected_yield: float | None = Field(default=None, ge=0, le=1)
 
+
 class SynthesisRoute(BaseModel):
     """
     Known, proposed, or predicted route for producing a material.
-    
+
     Attributes:
         name (str):
             Name of the synthesis route.
@@ -210,6 +220,7 @@ class SynthesisRoute(BaseModel):
         demonstrated_scale_units (str | None):
             Units for the demonstrated scale.
     """
+
     name: str
     origin: RouteOrigin = RouteOrigin.UNKNOWN
     description: str | None = None
@@ -220,10 +231,11 @@ class SynthesisRoute(BaseModel):
     demonstrated_scale: float | None = Field(default=None, ge=0)
     demonstrated_scale_units: str | None = None
 
+
 class ScaleUpScenario(BaseModel):
     """
     Material and production scenario submitted for assessment.
-    
+
     Attributes:
         material (MaterialSpec):
             Specification of the material being assessed.
@@ -240,6 +252,7 @@ class ScaleUpScenario(BaseModel):
         synthesis_route (SynthesisRoute | None):
             Synthesis route for producing the material.
     """
+
     material: MaterialSpec
     application: ApplicationSpec | None = None
     production_location: LocationSpec | None = None

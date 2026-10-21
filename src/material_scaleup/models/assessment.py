@@ -1,4 +1,3 @@
-
 # src/material_scaleup/models/assessment.py
 
 from pydantic import BaseModel, Field, model_validator
@@ -18,10 +17,11 @@ __all__ = [
     "ValidationAction",
 ]
 
+
 class RiskAssessment(BaseModel):
     """
     Assessment of one scale-up risk category.
-    
+
     Attributes:
         category (AssessmentCategory):
             The risk category being assessed.
@@ -50,6 +50,7 @@ class RiskAssessment(BaseModel):
         recommendations (list[str]):
             Recommended actions based on the assessment.
     """
+
     category: AssessmentCategory
     status: AssessmentStatus = AssessmentStatus.ASSESSED
     score: float | None = Field(default=None, ge=0, le=100)
@@ -75,16 +76,15 @@ class RiskAssessment(BaseModel):
             }
             and self.score is not None
         ):
-            raise ValueError(
-                f"Assessment status '{self.status}' must not include a score."
-            )
+            raise ValueError(f"Assessment status '{self.status}' must not include a score.")
 
         return self
+
 
 class Barrier(BaseModel):
     """
     A major barrier to scaling the proposed production scenario.
-    
+
     Attributes:
         title (str):
             The title of the barrier.
@@ -104,6 +104,7 @@ class Barrier(BaseModel):
         evidence (list[Evidence]):
             Supporting evidence for the barrier.
     """
+
     title: str
     description: str
     severity: float = Field(ge=0, le=100)
@@ -111,10 +112,11 @@ class Barrier(BaseModel):
     affected_categories: list[AssessmentCategory] = Field(default_factory=list)
     evidence: list[Evidence] = Field(default_factory=list)
 
+
 class ValidationAction(BaseModel):
     """
     A recommended experiment, analysis, or data-gathering action.
-    
+
     Attributes:
         question (str):
             The question that the validation action aims to address.
@@ -134,6 +136,7 @@ class ValidationAction(BaseModel):
         affected_categories (list[AssessmentCategory]):
             The risk categories affected by this validation action.
     """
+
     question: str
     rationale: str
     priority: Priority
@@ -141,10 +144,11 @@ class ValidationAction(BaseModel):
     expected_decision_impact: str | None = None
     affected_categories: list[AssessmentCategory] = Field(default_factory=list)
 
+
 class ScaleUpAssessment(BaseModel):
     """
     Overall assessment of a specific scale-up scenario.
-    
+
     Attributes:
         scenario (ScaleUpScenario):
             The scale-up scenario being assessed.
@@ -176,6 +180,7 @@ class ScaleUpAssessment(BaseModel):
         executive_summary (str | None):
             A summary of the assessment for executive review.
     """
+
     scenario: ScaleUpScenario
     category_assessments: list[RiskAssessment] = Field(default_factory=list)
     major_barriers: list[Barrier] = Field(default_factory=list)
@@ -190,16 +195,14 @@ class ScaleUpAssessment(BaseModel):
     @model_validator(mode="after")
     def require_assessment_for_overall_score(self) -> "ScaleUpAssessment":
         if self.overall_score is not None and not self.category_assessments:
-            raise ValueError(
-                "An overall score requires at least one category assessment."
-            )
+            raise ValueError("An overall score requires at least one category assessment.")
 
         return self
 
     def get_category(self, category: AssessmentCategory) -> RiskAssessment | None:
         """
         Return the assessment for a category, if present.
-        
+
         Args:
             category (AssessmentCategory):
                 The category for which to retrieve the assessment.
@@ -216,4 +219,3 @@ class ScaleUpAssessment(BaseModel):
             ),
             None,
         )
-    

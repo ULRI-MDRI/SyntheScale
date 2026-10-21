@@ -1,14 +1,14 @@
-
 # src/material_scaleup/models/context.py
 
 from pydantic import BaseModel, Field
 
-from .scenario import ScaleUpScenario
 from .evidence import Evidence
+from .scenario import ScaleUpScenario
 
 __all__ = [
     "AssessmentContext",
 ]
+
 
 class AssessmentContext(BaseModel):
     """
@@ -27,6 +27,7 @@ class AssessmentContext(BaseModel):
         data_gaps (list[str]):
             List of identified data gaps in the scale-up assessment.
     """
+
     scenario: ScaleUpScenario
     evidence: list[Evidence] = Field(default_factory=list)
     assumptions: list[str] = Field(default_factory=list)

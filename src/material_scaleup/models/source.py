@@ -1,19 +1,19 @@
-
 # src/material_scaleup/models/source.py
 
-from pydantic import BaseModel, Field
-
 from datetime import date, datetime
+
+from pydantic import BaseModel, Field
 
 __all__ = [
     "Source",
     "SourceLocation",
 ]
 
+
 class SourceLocation(BaseModel):
     """
     Location of supporting information within a source.
-    
+
     Attributes:
         page (int | None):
             The page number within the source, if available.
@@ -36,6 +36,7 @@ class SourceLocation(BaseModel):
     table: str | None = None
     figure: str | None = None
     excerpt: str | None = None
+
 
 class Source(BaseModel):
     """
@@ -67,6 +68,7 @@ class Source(BaseModel):
             The location of supporting information within the source,
             if available.
     """
+
     name: str
     publisher: str | None = None
     url: str | None = None

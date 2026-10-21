@@ -1,25 +1,25 @@
-
 import pytest
 from pydantic import ValidationError
 
-from material_scaleup.models.chemical import (
-    ChemicalIdentity,
-    MaterialSpec,
-)
-from material_scaleup.models.evidence import Evidence
-from material_scaleup.models.scenario import (
-    ScaleUpScenario,
-    ApplicationSpec,
-    LocationSpec,
-    ProductionTarget,
-)
 from material_scaleup.models.assessment import RiskAssessment
 from material_scaleup.models.categories import (
     AssessmentCategory,
     AssessmentStatus,
     EvidenceStatus,
 )
+from material_scaleup.models.chemical import (
+    ChemicalIdentity,
+    MaterialSpec,
+)
+from material_scaleup.models.evidence import Evidence
+from material_scaleup.models.scenario import (
+    ApplicationSpec,
+    LocationSpec,
+    ProductionTarget,
+    ScaleUpScenario,
+)
 from material_scaleup.models.source import Source
+
 
 def test_chemical_does_not_require_cas_rn():
     chemical = ChemicalIdentity(
