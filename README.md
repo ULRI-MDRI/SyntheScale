@@ -2,9 +2,7 @@
 
 ## Goal
 
-Material Scaleup assesses the potential scale-up feasibility of novel
-materials using chemical, economic, supply-chain, safety, and regulatory
-information.
+Given a computationally proposed or experimentally developed material, production location, and intended application, what are the major barriers to producing it at kilogram-to-commercial scale, what evidence supports each conclusion, and what should be validated next?
 
 The system combines authoritative data sources with AI-assisted analysis
 to produce transparent, source-grounded feasibility assessments.
