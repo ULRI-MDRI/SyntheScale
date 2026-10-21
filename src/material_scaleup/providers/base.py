@@ -1,5 +1,5 @@
 
-# src/material_scaleup/providers.py/base.py
+# src/material_scaleup/providers/base.py
 
 from abc import ABC, abstractmethod
 

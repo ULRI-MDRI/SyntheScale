@@ -1,25 +1,15 @@
 
 # src/material_scaleup/models/assessment.py
 
-from enum import StrEnum
-
 from pydantic import BaseModel, Field
 
 from material_scaleup.models.source import Source
+from material_scaleup.models.categories import AssessmentCategory
 
 __all__ = [
-    "AssessmentCategory",
     "RiskAssessment",
     "ScaleUpAssessment",
 ]
-
-class AssessmentCategory(StrEnum):
-    AVAILABILITY = "availability"
-    COST = "cost"
-    MARKET_VOLATILITY = "market_volatility"
-    SUPPLY_CHAIN = "supply_chain"
-    SAFETY = "safety"
-    REGULATORY = "regulatory"
 
 class RiskAssessment(BaseModel):
     """

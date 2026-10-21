@@ -1,8 +1,6 @@
 
 # src/material_scaleup/models/evidence.py
 
-from datetime import datetime
-
 from pydantic import BaseModel, Field
 
 from material_scaleup.models.assessment import AssessmentCategory
