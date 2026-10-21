@@ -6,29 +6,11 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 from material_scaleup.models.assessment import AssessmentCategory
+from material_scaleup.models.source import Source
 
 __all__ = [
-    "EvidenceSource",
     "Evidence",
 ]
-
-class EvidenceSource(BaseModel):
-    """
-    Source from which a piece of evidence was obtained.
-    
-    Attributes:
-        name (str):
-            The name of the source.
-
-        url (str | None):
-            The URL of the source, if available.
-
-        accessed_at (datetime | None):
-            The date and time when the source was accessed.
-    """
-    name: str
-    url: str | None = None
-    accessed_at: datetime | None = None
 
 class Evidence(BaseModel):
     """
@@ -47,7 +29,7 @@ class Evidence(BaseModel):
         units (str | None):
             The units of the value, if applicable.
 
-        source (EvidenceSource):
+        source (Source):
             The source from which the evidence was obtained.
 
         metadata (dict[str, str | int | float | bool | None]):
@@ -57,7 +39,7 @@ class Evidence(BaseModel):
     claim: str
     value: str | int | float | bool | None = None
     units: str | None = None
-    source: EvidenceSource
+    source: Source
     metadata: dict[str, str | int | float | bool | None] = Field(
         default_factory=dict
     )

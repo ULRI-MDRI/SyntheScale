@@ -1,13 +1,14 @@
 
 # src/material_scaleup/models/assessment.py
 
+from enum import StrEnum
+
 from pydantic import BaseModel, Field
 
-from enum import StrEnum
+from material_scaleup.models.source import Source
 
 __all__ = [
     "AssessmentCategory",
-    "AssessmentSource",
     "RiskAssessment",
     "ScaleUpAssessment",
 ]
@@ -19,24 +20,6 @@ class AssessmentCategory(StrEnum):
     SUPPLY_CHAIN = "supply_chain"
     SAFETY = "safety"
     REGULATORY = "regulatory"
-
-class AssessmentSource(BaseModel):
-    """
-    Represents the source of information for an assessment.
-
-    Attributes:
-        title (str):
-            The title of the source.
-
-        url (str | None):
-            The URL of the source, if available.
-
-        provider (str | None):
-            The provider of the source, if available.
-    """
-    title: str
-    url: str | None = None
-    provider: str | None = None
 
 class RiskAssessment(BaseModel):
     """
@@ -52,13 +35,13 @@ class RiskAssessment(BaseModel):
         evidence (list[str]):
             A list of evidence supporting the assessment.
 
-        sources (list[AssessmentSource]):
+        sources (list[Source]):
             A list of sources for the assessment.
     """
     score: float | None = Field(default=None, ge=0, le=100)
     summary: str
     evidence: list[str] = Field(default_factory=list)
-    sources: list[AssessmentSource] = Field(default_factory=list)
+    sources: list[Source] = Field(default_factory=list)
 
 class ScaleUpAssessment(BaseModel):
     """
