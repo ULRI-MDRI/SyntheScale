@@ -14,11 +14,36 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Dependencies
-node_modules/
-vendor/
+# Virtual environments
 venv/
+.venv/
+env/
+ENV/
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+
+# Python packaging
+*.egg
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+
+# Type checking / linting
+.mypy_cache/
+.pyright/
+.ruff_cache/
 
 # Build outputs
 dist/
@@ -27,6 +52,13 @@ build/
 coverage/
 .next/
 target/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Jupyter
+.ipynb_checkpoints/
 
 # Secrets
 *.key
