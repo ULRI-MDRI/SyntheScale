@@ -3,7 +3,7 @@
 
 from pydantic import BaseModel, Field
 
-from .chemical import ChemicalIdentity
+from .scenario import ScaleUpScenario
 from .evidence import Evidence
 
 __all__ = [
@@ -12,14 +12,22 @@ __all__ = [
 
 class AssessmentContext(BaseModel):
     """
-    Assessment context for a scale-up evaluation.
+    Complete evidence packet supplied to an assessment workflow.
 
     Attributes:
-        chemical (ChemicalIdentity):
-            The chemical being assessed.
+        scenario (ScaleUpScenario):
+            The scale-up scenario being assessed.
 
         evidence (list[Evidence]):
-            The list of evidence related to the chemical.
+            The list of evidence related to the scale-up assessment.
+
+        assumptions (list[str]):
+            List of assumptions made in the scale-up assessment.
+
+        data_gaps (list[str]):
+            List of identified data gaps in the scale-up assessment.
     """
-    chemical: ChemicalIdentity
+    scenario: ScaleUpScenario
     evidence: list[Evidence] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
+    data_gaps: list[str] = Field(default_factory=list)
