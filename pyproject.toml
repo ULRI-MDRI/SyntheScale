@@ -33,6 +33,9 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra"
+markers = [
+    "integration: tests that make requests to external services or APIs",
+]
 
 
 [tool.ruff]

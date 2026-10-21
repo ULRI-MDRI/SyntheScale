@@ -33,6 +33,44 @@ class ChemicalIdentityProvider(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def get_by_name(self, name: str) -> ChemicalIdentity:
+        """
+        Resolve a chemical using its common name.
+        
+        Args:
+            name (str):
+                The common name of the chemical to resolve.
+
+        Returns:
+            ChemicalIdentity:
+                The resolved chemical identity.
+
+        Raises:
+            NotImplementedError:
+                If the method is not implemented by the provider.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_by_smiles(self, smiles: str) -> ChemicalIdentity:
+        """
+        Resolve a chemical using its SMILES representation.
+        
+        Args:
+            smiles (str):
+                The SMILES representation of the chemical to resolve.
+
+        Returns:
+            ChemicalIdentity:
+                The resolved chemical identity.
+
+        Raises:
+            NotImplementedError:
+                If the method is not implemented by the provider.
+        """
+        raise NotImplementedError
+
 class EvidenceProvider(ABC):
     """Provider capable of retrieving scale-up evidence."""
     @abstractmethod
