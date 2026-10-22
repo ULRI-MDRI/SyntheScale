@@ -17,19 +17,14 @@ from material_scaleup.models.scenario import (
     SynthesisRoute,
 )
 from material_scaleup.providers.pubchem import PubChemProvider
-from material_scaleup.providers.pubchem_safety import (
-    PubChemSafetyProvider,
-)
+from material_scaleup.providers.pubchem_safety import PubChemSafetyProvider
 from material_scaleup.providers.usgs import USGSCommodityProvider
-from material_scaleup.providers.world_bank import (
-    WorldBankCommodityProvider,
-)
-from material_scaleup.resolvers.commodity import (
-    CuratedCommodityResolver,
-)
+from material_scaleup.providers.world_bank import WorldBankCommodityProvider
+from material_scaleup.resolvers.commodity import CuratedCommodityResolver
 from material_scaleup.services.context_builder import (
     AssessmentContextBuilder,
 )
+from material_scaleup.services.llm_context_builder import build_llm_context
 
 WORLD_BANK_PATH = Path("data/raw/world_bank/CMO-Historical-Data-Monthly.xlsx")
 
@@ -78,6 +73,14 @@ def test_context_builder_assembles_zeolite_evidence():
     )
 
     context = builder.build(scenario)
+
+    llm_context = build_llm_context(context)
+
+    assert llm_context.safety
+    assert llm_context.markets
+    assert llm_context.supply
+
+    assert len(llm_context.model_dump_json(exclude_none=True)) < len(context.model_dump_json(exclude_none=True))
 
     assert context.scenario == scenario
     assert context.evidence

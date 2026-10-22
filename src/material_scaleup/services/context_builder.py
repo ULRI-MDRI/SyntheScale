@@ -22,6 +22,13 @@ __all__ = [
 class AssessmentContextBuilder:
     """Assemble source-grounded evidence for a scale-up scenario."""
 
+    # Non-commodity inputs that should be excluded from commodity-based
+    # assessments. This can be expanded to include other non-commodity inputs
+    # as needed.
+    NON_COMMODITY_INPUTS = {
+        "water",
+    }
+
     def __init__(
         self,
         *,
@@ -82,11 +89,18 @@ class AssessmentContextBuilder:
 
             if not exposures:
                 chemical_label = (
-                    chemical.name or chemical.formula or chemical.cas_rn or "unknown chemical"
+                    chemical.name
+                    or chemical.formula
+                    or chemical.cas_rn
+                    or "unknown chemical"
                 )
 
+                if chemical_label.casefold() in self.NON_COMMODITY_INPUTS:
+                    continue
+
                 data_gaps.append(
-                    f"No underlying commodity exposure could be resolved for {chemical_label}."
+                    "No underlying commodity exposure could be "
+                    f"resolved for {chemical_label}."
                 )
 
                 continue
