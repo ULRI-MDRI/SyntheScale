@@ -1,4 +1,3 @@
-
 # src/material_scaleup/models/llm_context.py
 
 from datetime import date
@@ -20,7 +19,7 @@ __all__ = [
 class LLMSource(BaseModel):
     """
     Compact citation supplied to the language model.
-    
+
     Attributes:
         name (str):
             Compact name of the source.
@@ -72,7 +71,7 @@ class LLMChemicalInput(BaseModel):
 class LLMScenarioSummary(BaseModel):
     """
     Compact scenario information relevant to assessment.
-    
+
     Attributes:
         material_name (str):
             Name of the material.
@@ -116,7 +115,7 @@ class LLMScenarioSummary(BaseModel):
 class ChemicalSafetySummary(BaseModel):
     """
     Deduplicated safety information for one chemical.
-    
+
     Attributes:
         chemical (str):
             Name of the chemical.

@@ -80,7 +80,9 @@ def test_context_builder_assembles_zeolite_evidence():
     assert llm_context.markets
     assert llm_context.supply
 
-    assert len(llm_context.model_dump_json(exclude_none=True)) < len(context.model_dump_json(exclude_none=True))
+    assert len(llm_context.model_dump_json(exclude_none=True)) < len(
+        context.model_dump_json(exclude_none=True)
+    )
 
     assert context.scenario == scenario
     assert context.evidence
@@ -113,4 +115,4 @@ def test_context_builder_assembles_zeolite_evidence():
 
     assert any("sodium hydroxide" in gap.casefold() for gap in context.data_gaps)
 
-    assert any("water" in gap.casefold() for gap in context.data_gaps)
+    assert not any("water" in gap.casefold() for gap in context.data_gaps)

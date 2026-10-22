@@ -1,11 +1,9 @@
-
 # src/material_scaleup/services/llm_context_builder.py
 
-from typing import Any
-from collections import defaultdict
-
 import re
+from collections import defaultdict
 from datetime import date
+from typing import Any
 
 from material_scaleup.models.categories import AssessmentCategory
 from material_scaleup.models.context import AssessmentContext
@@ -104,7 +102,7 @@ def _scenario_chemical_formulas(context: AssessmentContext) -> dict[str, str]:
 def _build_scenario_summary(context: AssessmentContext) -> LLMScenarioSummary:
     """
     Create a compact summary of the assessment scenario.
-    
+
     Args:
         context (AssessmentContext):
             The full assessment context containing scenario, evidence,
@@ -131,9 +129,7 @@ def _build_scenario_summary(context: AssessmentContext) -> LLMScenarioSummary:
             scenario.production_location.country,
         ]
 
-        location = ", ".join(
-            part for part in location_parts if part
-        ) or None
+        location = ", ".join(part for part in location_parts if part) or None
 
     target_amount = None
     target_units = None
@@ -181,7 +177,7 @@ def _build_safety_summaries(
 ) -> list[ChemicalSafetySummary]:
     """
     Group and deduplicate PubChem safety evidence by chemical.
-    
+
     Args:
         evidence (list[Evidence]):
             A list of safety evidence items to be grouped and summarized.
@@ -247,10 +243,7 @@ def _build_safety_summaries(
             if item.source is not None:
                 sources.append(_compact_source(item.source))
 
-        combined_hazards = [
-            hazard_statements[code]
-            for code in sorted(hazard_statements)
-        ]
+        combined_hazards = [hazard_statements[code] for code in sorted(hazard_statements)]
 
         combined_hazards.extend(sorted(uncoded_statements))
 
@@ -338,15 +331,9 @@ def _build_market_summaries(
                     period_source,
                     "number_of_observations",
                 ),
-                price_change_percent=(
-                    None
-                    if change_value is None
-                    else round(change_value, 2)
-                ),
+                price_change_percent=(None if change_value is None else round(change_value, 2)),
                 annualized_volatility_percent=(
-                    None
-                    if volatility_value is None
-                    else round(volatility_value, 2)
+                    None if volatility_value is None else round(volatility_value, 2)
                 ),
                 sources=_deduplicate_sources(sources),
             )
@@ -423,9 +410,7 @@ def _build_supply_summaries(
 
                 import_reliance.append(
                     CommodityImportReliance(
-                        detail=_short_statistic_detail(
-                            _metadata_string(item, "statistic_detail")
-                        ),
+                        detail=_short_statistic_detail(_metadata_string(item, "statistic_detail")),
                         value=value,
                         value_qualifier=_metadata_string(item, "value_qualifier"),
                         raw_value=_metadata_string(item, "raw_value") or "",
@@ -437,17 +422,11 @@ def _build_supply_summaries(
             if item.source is not None:
                 sources.append(_compact_source(item.source))
 
-        production_value, production_units = (
-            _numeric_evidence_value(world_production)
-        )
+        production_value, production_units = _numeric_evidence_value(world_production)
 
-        reserves_value, reserves_units = (
-            _numeric_evidence_value(world_reserves)
-        )
+        reserves_value, reserves_units = _numeric_evidence_value(world_reserves)
 
-        concentration_value, _ = (
-            _numeric_evidence_value(production_concentration)
-        )
+        concentration_value, _ = _numeric_evidence_value(production_concentration)
 
         critical_value = _boolean_evidence_value(critical_status)
 
@@ -456,21 +435,13 @@ def _build_supply_summaries(
                 commodity=commodity,
                 world_production=production_value,
                 world_production_units=production_units,
-                world_production_raw_value=(
-                    _metadata_string(world_production, "raw_value")
-                ),
+                world_production_raw_value=(_metadata_string(world_production, "raw_value")),
                 world_reserves=reserves_value,
                 world_reserves_units=reserves_units,
-                world_reserves_raw_value=(
-                    _metadata_string(world_reserves, "raw_value")
-                ),
-                leading_producer=(
-                    _metadata_string(production_concentration, "country")
-                ),
+                world_reserves_raw_value=(_metadata_string(world_reserves, "raw_value")),
+                leading_producer=(_metadata_string(production_concentration, "country")),
                 leading_producer_share_percent=(
-                    None
-                    if concentration_value is None
-                    else round(concentration_value, 2)
+                    None if concentration_value is None else round(concentration_value, 2)
                 ),
                 import_reliance=import_reliance,
                 is_us_critical_mineral=critical_value,

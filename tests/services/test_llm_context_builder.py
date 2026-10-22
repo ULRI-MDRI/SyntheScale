@@ -1,13 +1,12 @@
-
 # tests/services/test_llm_context_builder.py
 
 from material_scaleup.models.categories import AssessmentCategory
-from material_scaleup.models.context import AssessmentContext
-from material_scaleup.models.evidence import Evidence, EvidenceValue
 from material_scaleup.models.chemical import (
     ChemicalIdentity,
     MaterialSpec,
 )
+from material_scaleup.models.context import AssessmentContext
+from material_scaleup.models.evidence import Evidence, EvidenceValue
 from material_scaleup.models.scenario import (
     ProcessInput,
     ScaleUpScenario,
@@ -90,9 +89,7 @@ def test_llm_context_deduplicates_safety_evidence():
     assert summary.formula == "HNaO"
     assert summary.signal_words == ["Danger"]
 
-    assert summary.hazard_statements == [
-        "H314: Causes severe skin burns and eye damage"
-    ]
+    assert summary.hazard_statements == ["H314: Causes severe skin burns and eye damage"]
 
     assert len(summary.sources) == 1
 
