@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from .evidence import Evidence
 from .scenario import ScaleUpScenario
+from .trade import AvailabilityResult
 
 __all__ = [
     "AssessmentContext",
@@ -32,3 +33,4 @@ class AssessmentContext(BaseModel):
     evidence: list[Evidence] = Field(default_factory=list)
     assumptions: list[str] = Field(default_factory=list)
     data_gaps: list[str] = Field(default_factory=list)
+    trade_availability: list[AvailabilityResult] = Field(default_factory=list)

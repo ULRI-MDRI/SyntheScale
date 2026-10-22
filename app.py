@@ -21,7 +21,8 @@ from material_scaleup.models.scenario import (
     ScaleUpScenario,
     SynthesisRoute,
 )
-from material_scaleup.providers.pubchem import PubChemProvider
+from material_scaleup.providers.comtrade import ComtradeError
+from material_scaleup.providers.pubchem import ChemicalNotFoundError, PubChemProvider
 from material_scaleup.providers.pubchem_safety import (
     PubChemSafetyProvider,
 )
@@ -38,10 +39,13 @@ from material_scaleup.services.context_builder import (
 from material_scaleup.services.llm_context_builder import (
     build_llm_context,
 )
-from material_scaleup.services.openai_client import (
-    create_assessment_generator_from_environment,
+from material_scaleup.ui.availability import (
+    render_availability_lookup,
+    render_trade_results,
+    render_trade_selection,
+    select_country,
+    trade_catalogs,
 )
-
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent
 
@@ -122,6 +126,10 @@ def get_context_builder() -> AssessmentContextBuilder:
 @st.cache_resource
 def get_assessment_generator():
     """Create and cache the configured LLM generator."""
+
+    from material_scaleup.services.openai_client import (
+        create_assessment_generator_from_environment,
+    )
 
     return create_assessment_generator_from_environment()
 
@@ -413,10 +421,19 @@ def render_assessment(
 
 def render_evidence(
     llm_context,
+    *,
+    trade_availability=None,
 ) -> None:
     """Render compact evidence supplied to the LLM."""
 
     st.header("Evidence & sources")
+
+    trade_results = (
+        llm_context.trade_availability if trade_availability is None else trade_availability
+    )
+    if trade_results:
+        st.subheader("Country-specific historical trade")
+        render_trade_results(trade_results)
 
     if llm_context.safety:
         st.subheader("Chemical safety")
@@ -610,6 +627,35 @@ def main() -> None:
         "reasoning."
     )
 
+    include_trade = st.toggle(
+        "Enable UN Comtrade",
+        value=False,
+        key="enable_un_comtrade",
+        help=(
+            "Enable on a network that can reach the Comtrade API, such as your hotspot. "
+            "Turn off on restricted networks to skip all Comtrade requests."
+        ),
+    )
+    if not include_trade:
+        for state_key in ("lookup_trade_results", "assessment_trade_results"):
+            st.session_state.pop(state_key, None)
+        st.info(
+            "UN Comtrade is disabled. No Comtrade requests will be made, and trade "
+            "evidence will not be included in assessments. Other evidence sources remain available."
+        )
+
+    workflow = st.radio(
+        "Workflow",
+        ["Scale-up assessment", "Country/material availability"],
+        horizontal=True,
+    )
+    if workflow == "Country/material availability":
+        if include_trade:
+            render_availability_lookup()
+        else:
+            st.info("Turn on Enable UN Comtrade to use country/material availability lookup.")
+        return
+
     if not WORLD_BANK_PATH.exists() or not USGS_PATH.exists():
         st.error(
             "Required external datasets are missing. Run "
@@ -619,6 +665,18 @@ def main() -> None:
 
     st.header("Assess a material")
 
+    countries, products = [], []
+    if include_trade:
+        try:
+            countries, products = trade_catalogs()
+        except ComtradeError as error:
+            st.error(str(error))
+            st.info(
+                "Follow the diagnostic above, or turn off Enable UN Comtrade to continue "
+                "with the existing assessment sources."
+            )
+            st.stop()
+
     left, right = st.columns(2)
 
     with left:
@@ -627,10 +685,15 @@ def main() -> None:
             value="Zeolite 13X",
         )
 
-        country = st.text_input(
-            "Production country",
-            value="United States",
-        )
+        selected_country = None
+        if include_trade:
+            selected_country = select_country(countries, key="assessment_country")
+            country = selected_country.name
+        else:
+            country = st.text_input(
+                "Production country",
+                value="United States",
+            )
 
         target_amount = st.number_input(
             "Target production amount",
@@ -696,6 +759,20 @@ def main() -> None:
         key="chemical_inputs",
     )
 
+    trade_results = []
+    if selected_country is not None:
+        st.subheader("Confirm trade classifications")
+        trade_results = render_trade_selection(
+            selected_country,
+            [
+                str(value).strip()
+                for value in edited_inputs["Chemical"].dropna()
+                if str(value).strip().casefold() != "water"
+            ],
+            products,
+            key="assessment",
+        )
+
     assess = st.button(
         "Assess scale-up",
         type="primary",
@@ -737,9 +814,25 @@ def main() -> None:
 
             full_context = (
                 get_context_builder().build(
-                    scenario
+                    scenario,
+                    trade_availability=trade_results,
                 )
             )
+            if include_trade:
+                covered = {result.match.requested_material for result in trade_results}
+                for value in edited_inputs["Chemical"].dropna():
+                    name = str(value).strip()
+                    if name and name.casefold() != "water" and name not in covered:
+                        full_context.data_gaps.append(
+                            "No confirmed country-specific trade evidence "
+                            f"was retrieved for {name}."
+                        )
+            else:
+                full_context.data_gaps.append(
+                    "UN Comtrade was disabled by the user. Country-specific trade evidence "
+                    "was not retrieved; this does not establish low availability "
+                    "or supply-chain risk."
+                )
 
             st.write(
                 f"Collected {len(full_context.evidence)} "
@@ -777,7 +870,10 @@ def main() -> None:
             render_assessment(assessment)
 
         with evidence_tab:
-            render_evidence(llm_context)
+            render_evidence(
+                llm_context,
+                trade_availability=full_context.trade_availability,
+            )
 
             if llm_context.data_gaps:
                 st.subheader("Evidence gaps")
@@ -793,6 +889,9 @@ def main() -> None:
                         exclude_none=True,
                     )
                 )
+
+    except ChemicalNotFoundError as error:
+        st.error(str(error))
 
     except Exception as error:
         st.error(

@@ -65,6 +65,18 @@ def build_llm_context(context: AssessmentContext) -> LLMContext:
         safety=safety,
         markets=_build_market_summaries(context.evidence),
         supply=_build_supply_summaries(context.evidence),
+        trade_availability=[
+            result.model_copy(
+                update={
+                    "observations": [],
+                    "years": [
+                        year.model_copy(update={"partners": year.partners[:3]})
+                        for year in result.years
+                    ],
+                }
+            )
+            for result in context.trade_availability
+        ],
         assumptions=_deduplicate(context.assumptions),
         data_gaps=_deduplicate(context.data_gaps),
     )

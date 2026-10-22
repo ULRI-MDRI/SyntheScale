@@ -92,6 +92,13 @@ Used for:
 
 No API credentials are required for the World Bank or USGS datasets.
 
+**UN Comtrade (country/material availability pilot)**
+
+Used for country-specific annual imports, reported trading partners, historical
+import-value trends, partner-value concentration, and historical import unit
+values. Requires `UN_COMTRADE_API_KEY`. These indicators describe trade categories,
+not live inventory, exact-grade supply, supplier quotations or delivered costs.
+
 ## How it works
 
 ```text
@@ -256,6 +263,143 @@ streamlit run app.py
 
 Open the local URL shown by Streamlit, enter a material and proposed synthesis
 route, and select **Assess scale-up**.
+
+### Country/material availability
+
+Configure an authenticated UN Comtrade account key in the environment before
+starting Streamlit:
+
+```bash
+export UN_COMTRADE_API_KEY="your-comtrade-api-key"
+streamlit run app.py
+```
+
+Do not commit keys. Restart the app after changing credentials. The provider sends
+the key in a request header, not query strings, exported results or UI messages.
+It does not fall back to unauthenticated preview data.
+
+Select **Country/material availability** for a standalone lookup. This workflow
+does not require an OpenAI key, the OpenAI package, or local World Bank/USGS data.
+Turn on the global **Enable UN Comtrade** toggle to connect. It defaults to **off**
+even when an API key is configured, so opening the app on a restricted corporate
+network does not trigger Comtrade requests. Enable it on a working network such
+as your hotspot. Your choice persists across reruns and workflow changes within
+the current Streamlit session.
+
+1. Select a destination from the Comtrade reporting-country/area catalog.
+2. Enter up to ten materials, one per line, or search using a six-digit HS code.
+3. Choose a suggested HS2022 category for each material.
+4. Confirm each category's scope before selecting **Retrieve trade evidence**.
+5. Inspect annual results, partner records, warnings and coverage; download the
+   provenance-rich JSON evidence if needed.
+
+Reviewed pilot category suggestions cover sodium aluminate, sodium silicate,
+sodium hydroxide/caustic soda and urea. Sodium aluminate uses a broad salts
+category; sodium silicate and sodium hydroxide require attention to product form.
+Other names use conservative catalog search suggestions. All current suggestions
+require confirmation, including exact code searches. Lexical similarity and user
+confirmation do not establish chemical equivalence, grade, purity or concentration.
+Unresolved materials remain unresolved; no chemical is silently substituted.
+
+Results persist across reruns. Changing country, material, selected category or
+confirmation invalidates the displayed lookup. Unselected materials remain
+explicit gaps; one failed period/material does not discard other results.
+
+In **Scale-up assessment**, turn on the same **Enable UN Comtrade** toggle.
+Use the same country dropdown
+and classification/confirmation controls before assessing. Materials without
+retrieved trade evidence are recorded as gaps. Water is omitted from the default
+precursor trade lookup. Turn the toggle off to retain the existing assessment
+workflow without Comtrade credentials or network access to Comtrade. Off means no
+Comtrade requests in either workflow and no trade evidence attached to assessments;
+other providers may still use their own network connections. Previously retrieved
+trade results are cleared when disabled and must be retrieved again after enabling.
+Assessments explicitly record disabled trade evidence as a data gap, not low risk.
+Connection failures remain visible while enabled; the app does not silently switch
+the toggle off. You can turn it off even after a failure to continue assessing.
+
+#### Coverage and interpretation
+
+- The provider requests up to the latest five available completed annual periods
+  using **HS (reported classification)** for availability, counts and trade queries.
+  Material candidates still come from the HS2022 catalog; this is not a claim
+  that returned data use HS2022. Returned `classificationCode` or `clCode` metadata
+  are preserved when present; missing revision metadata remains explicitly
+  unverified, never defaulted to H6. A different/missing revision produces a
+  category-equivalence warning. Cross-year trends are withheld unless every
+  period's records match the selected catalog revision. Five periods are not
+  guaranteed. Current-year data are
+  excluded; missing intervening/recent years and failures are disclosed. An annual
+  reporting period is not a guarantee of exhaustive customs coverage.
+- Monthly continuity and numeric availability-risk scores are **not released** in
+  this pilot. Existing assessments may score other independently supported
+  evidence; pilot trade indicators alone must not support numerical scores.
+- Requests use imports, total secondary partner, total customs and transport
+  dimensions. World totals are not added to bilateral values. Each annual query
+  checks a separate record count; missing, capped (1,000 records), mismatched,
+  duplicate or unexpected records are rejected rather than treated as complete.
+  Count-only requests omit data-display options; data requests use JSON with
+  descriptions and a record cap. Neither forces a breakdown mode. Failures identify
+  the count or data operation, and failed annual requests are labeled `error`,
+  not `insufficient_data`.
+- Concentration uses **reported partner value**, including any special or
+  unspecified partner areas. It is not a count of independent suppliers or
+  verified origin countries. Partner totals must reconcile to the world total
+  within 0.5% or USD 1; otherwise concentration and cost benchmarks are withheld.
+- Historical USD/kg is the ratio of value to net weight for the **same eligible
+  partner records**. Missing/zero/estimated weights are excluded. At least 80% of
+  partner trade value must have usable non-estimated weight; coverage is displayed.
+  This is a conservative pilot quality gate, not a calibrated risk threshold.
+- The unit-value calculation uses primary import values. Imports are generally
+  CIF-valued, but country valuation exceptions are not verified. Do not assume
+  transport costs can be added again. Grade, concentration, taxes, domestic
+  delivery and distributor margins are not established by these benchmarks.
+- Value trends are nominal USD changes, not quantity trends or price indices.
+  Low imports do not establish scarcity or import dependence; domestic production
+  and existing demand may be significant.
+- Domestic supply, verified restrictions and logistics are explicitly **not
+  checked** by this first release. Existing USGS upstream evidence remains
+  separate; it does not prove direct precursor availability.
+- API responses are cached in memory for up to one hour, bounded to 256 entries
+  per provider. The displayed timestamp is lookup time. Each material requests at
+  most five annual record counts and five annual datasets, plus shared reference
+  and reporting-availability queries. Transient failures receive at most three
+  attempts with bounded delays; account entitlement errors are surfaced.
+
+Live authenticated contract validation (network access and a configured key
+required):
+
+```bash
+pytest -q tests/providers/test_comtrade.py -m integration
+```
+
+An absent key skips this opt-in test; a skip does not establish live API
+compatibility. Offline tests use representative mocked response contracts.
+
+#### Troubleshooting Comtrade connectivity
+
+The app distinguishes DNS lookup, timeout, proxy, TLS certificate and HTTP
+authentication failures without displaying credentials or raw exception details.
+
+For a DNS/connection error, test connectivity without sending your API key:
+
+```bash
+nslookup comtradeapi.un.org
+nslookup comtrade.azure-api.net
+curl --head --connect-timeout 5 --max-time 15 https://comtradeapi.un.org/
+```
+
+The API hostname may resolve through the Azure API Management alias. If the
+alias has no address or reports `NXDOMAIN`, requests cannot reach authentication.
+The main Comtrade website loading does not establish API connectivity. Check
+your VPN, DNS or corporate firewall with your network administrator, or retry
+after an API/DNS outage. Do not hard-code IP addresses, redirect credentials to
+unverified hosts, or disable TLS verification.
+
+For a missing key or HTTP 401/403, export `UN_COMTRADE_API_KEY` in the same
+terminal used to start Streamlit, then restart Streamlit. Exporting a variable
+does not update an already-running process or other terminals. Never paste the
+key into diagnostic output.
 
 ## Streamlit interface
 

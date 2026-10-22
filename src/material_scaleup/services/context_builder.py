@@ -1,14 +1,18 @@
 # src/material_scaleup/services/context_builder.py
 
+from datetime import date
+
 from material_scaleup.calculations.market_evidence import (
     commodity_market_evidence,
 )
 from material_scaleup.calculations.supply_evidence import (
     usgs_supply_evidence,
 )
+from material_scaleup.models.categories import AssessmentCategory
 from material_scaleup.models.context import AssessmentContext
-from material_scaleup.models.evidence import Evidence
+from material_scaleup.models.evidence import Evidence, EvidenceScope, EvidenceValue
 from material_scaleup.models.scenario import ScaleUpScenario
+from material_scaleup.models.trade import AvailabilityResult
 from material_scaleup.providers.pubchem_safety import PubChemSafetyProvider
 from material_scaleup.providers.usgs import USGSCommodityProvider
 from material_scaleup.providers.world_bank import WorldBankCommodityProvider
@@ -44,13 +48,21 @@ class AssessmentContextBuilder:
         self.usgs_provider = usgs_provider
         self.market_history_months = market_history_months
 
-    def build(self, scenario: ScaleUpScenario) -> AssessmentContext:
+    def build(
+        self,
+        scenario: ScaleUpScenario,
+        *,
+        trade_availability: list[AvailabilityResult] | None = None,
+    ) -> AssessmentContext:
         """
         Build the complete assessment context.
 
         Args:
             scenario (ScaleUpScenario):
                 The scale-up scenario for which to build the assessment context.
+
+            trade_availability (list[AvailabilityResult] | None):
+                Previously retrieved, confirmed country/input trade evidence.
 
         Returns:
             AssessmentContext:
@@ -61,6 +73,85 @@ class AssessmentContextBuilder:
         evidence: list[Evidence] = []
         assumptions: list[str] = []
         data_gaps: list[str] = []
+        trade_results = trade_availability or []
+        route_inputs = scenario.synthesis_route.inputs if scenario.synthesis_route else []
+        route_names = {
+            name.strip().casefold()
+            for process_input in route_inputs
+            for name in (
+                process_input.chemical.name,
+                process_input.chemical.cas_rn,
+                *process_input.chemical.synonyms,
+            )
+            if name
+        }
+        for result in trade_results:
+            if (
+                scenario.production_location is None
+                or scenario.production_location.country != result.country.name
+            ):
+                raise ValueError("Trade evidence country must match the production country.")
+            if result.match.requires_confirmation and not result.confirmed:
+                raise ValueError("Trade evidence requires confirmed product classification.")
+            if result.match.requested_material.strip().casefold() not in route_names:
+                raise ValueError("Trade evidence material must match a synthesis input.")
+            data_gaps.extend(result.data_gaps)
+            for year in result.years:
+                for field, value, units, category in (
+                    (
+                        "import_value_usd",
+                        year.import_value_usd,
+                        "USD",
+                        AssessmentCategory.AVAILABILITY,
+                    ),
+                    (
+                        "largest_partner_share_percent",
+                        year.largest_partner_share_percent,
+                        "%",
+                        AssessmentCategory.SUPPLY_CHAIN,
+                    ),
+                    (
+                        "unit_value_usd_per_kg",
+                        year.unit_value_usd_per_kg,
+                        "USD/kg",
+                        AssessmentCategory.COST,
+                    ),
+                ):
+                    if value is None:
+                        continue
+                    evidence.append(
+                        Evidence(
+                            category=category,
+                            claim=(
+                                f"{result.match.requested_material}: {field} for "
+                                f"HS code {result.match.product.code}, {year.year}; "
+                                "reported revision "
+                                f"{', '.join(year.reported_classifications) or 'unverified'}"
+                            ),
+                            reported_value=EvidenceValue(value=value, units=units),
+                            source=result.source,
+                            scope=EvidenceScope(
+                                country=result.country.name,
+                                period_start=date(year.year, 1, 1),
+                                period_end=date(year.year, 12, 31),
+                            ),
+                            notes=" ".join([result.match.reason, *year.warnings]),
+                            metadata={
+                                "observation_type": f"trade_{field}",
+                                "material": result.match.requested_material,
+                                "hs_code": result.match.product.code,
+                                "catalog_classification": result.match.product.classification,
+                                "query_classification": result.query_classification,
+                                "reported_classifications":
+                                    ", ".join(year.reported_classifications) or None,
+                                "classification_matches_catalog": (
+                                    year.classification_matches_catalog
+                                ),
+                                "match_relationship": result.match.relationship,
+                                "year": year.year,
+                            },
+                        )
+                    )
 
         # Safety evidence originates at the individual chemical level.
         evidence.extend(self.safety_provider.get_evidence(scenario))
@@ -78,6 +169,7 @@ class AssessmentContextBuilder:
                 evidence=evidence,
                 assumptions=assumptions,
                 data_gaps=data_gaps,
+                trade_availability=trade_results,
             )
 
         assessed_commodities: set[str] = set()
@@ -130,9 +222,10 @@ class AssessmentContextBuilder:
         )
 
         assumptions.append(
-            "Commodity mappings are curated prototype mappings and "
-            "do not represent a complete chemical-to-commodity "
-            "ontology."
+            "Chemical-to-commodity exposures use curated prototype mappings, "
+            "not a complete chemical-to-commodity ontology. Provider commodity "
+            "names use curated aliases, exact catalog lookup, and conservative "
+            "lexical matching; name similarity does not establish chemical equivalence."
         )
 
         return AssessmentContext(
@@ -140,6 +233,7 @@ class AssessmentContextBuilder:
             evidence=evidence,
             assumptions=assumptions,
             data_gaps=self._deduplicate(data_gaps),
+            trade_availability=trade_results,
         )
 
     def _add_world_bank_evidence(

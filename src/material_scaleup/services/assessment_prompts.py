@@ -52,6 +52,17 @@ Rules:
 12. Assess only categories supported by the context. The most relevant
     categories are safety, cost, market_volatility, availability, and
     supply_chain.
+
+13. trade_availability contains pilot historical trade indicators, not live
+    inventory or supplier offers. Preserve match scope, warnings, reporting
+    periods and unchecked domestic-supply/restriction/logistics states.
+    A confirmed broad category is still a proxy, not exact-material evidence.
+    Do not assign numerical availability or supply-chain scores from these
+    pilot indicators. Other independent evidence may support scoring.
+
+14. Import unit values are historical customs-value benchmarks, not direct
+    precursor quotations or delivered costs. Do not infer import dependence
+    or scarcity from imports alone. Trade value changes are not quantity changes.
 """.strip()
 
 
