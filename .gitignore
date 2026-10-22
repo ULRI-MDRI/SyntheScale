@@ -67,3 +67,6 @@ secrets/
 
 # Downloaded external datasets
 data/raw/
+
+# Generated assessment runs
+outputs/
