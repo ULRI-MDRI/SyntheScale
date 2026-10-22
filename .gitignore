@@ -64,3 +64,6 @@ vendor/
 *.key
 *.pem
 secrets/
+
+# Downloaded external datasets
+data/raw/

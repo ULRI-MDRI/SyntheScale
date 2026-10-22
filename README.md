@@ -23,6 +23,16 @@ to produce transparent, source-grounded feasibility assessments.
 3. [Stack-specific setup instructions]
 4. Run the application
 
+## External data setup
+
+SyntheScale uses the World Bank Pink Sheet monthly commodity-price
+dataset for commodity-price and market-volatility analysis.
+
+Download and validate the required datasets:
+
+```bash
+python scripts/download_data.py
+
 ## Development
 
 ### Prerequisites

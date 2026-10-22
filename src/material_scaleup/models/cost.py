@@ -1,6 +1,6 @@
-
 # src/material_scaleup/models/cost.py
 
+from datetime import date
 from enum import StrEnum
 
 from pydantic import BaseModel, Field
@@ -13,19 +13,23 @@ __all__ = [
     "PriceQuote",
     "RawMaterialCost",
     "RawMaterialCostEstimate",
+    "CommodityPriceObservation",
 ]
+
 
 class PriceBasis(StrEnum):
     """Basis from which a raw-material price was obtained."""
+
     VENDOR = "vendor"
     COMMODITY = "commodity"
     USER_PROVIDED = "user_provided"
     ESTIMATED = "estimated"
 
+
 class PriceQuote(BaseModel):
     """
     Price observation for a chemical or commodity.
-    
+
     Attributes:
         chemical (ChemicalIdentity):
             Chemical identity of the material for which the price is quoted.
@@ -54,6 +58,7 @@ class PriceQuote(BaseModel):
         source (Source):
             Source of the price information.
     """
+
     chemical: ChemicalIdentity
     price: float = Field(ge=0)
     currency: str = "USD"
@@ -64,10 +69,11 @@ class PriceQuote(BaseModel):
     region: str | None = None
     source: Source
 
+
 class RawMaterialCost(BaseModel):
     """
     Cost contribution from one raw material.
-    
+
     Attributes:
         chemical (ChemicalIdentity):
             Chemical identity of the raw material.
@@ -93,6 +99,7 @@ class RawMaterialCost(BaseModel):
         price_quote (PriceQuote):
             Price quote associated with this raw material.
     """
+
     chemical: ChemicalIdentity
     required_quantity: float = Field(ge=0)
     quantity_units: str
@@ -101,6 +108,7 @@ class RawMaterialCost(BaseModel):
     cost_contribution: float = Field(ge=0)
     currency: str = "USD"
     price_quote: PriceQuote
+
 
 class RawMaterialCostEstimate(BaseModel):
     """
@@ -127,7 +135,7 @@ class RawMaterialCostEstimate(BaseModel):
             Currency in which the cost is expressed.
 
         cost_per_product_mass (float | None):
-            Estimated raw material cost per unit mass of the product, if 
+            Estimated raw material cost per unit mass of the product, if
             pplicable.
 
         cost_per_product_mass_units (str | None):
@@ -136,6 +144,7 @@ class RawMaterialCostEstimate(BaseModel):
         assumptions (list[str]):
             List of assumptions underlying the cost estimate.
     """
+
     product_amount: float = Field(gt=0)
     product_units: str
     input_costs: list[RawMaterialCost] = Field(default_factory=list)
@@ -144,3 +153,35 @@ class RawMaterialCostEstimate(BaseModel):
     cost_per_product_mass: float | None = Field(default=None, ge=0)
     cost_per_product_mass_units: str | None = None
     assumptions: list[str] = Field(default_factory=list)
+
+
+class CommodityPriceObservation(BaseModel):
+    """
+    Observed commodity price for one month.
+
+    Attributes:
+        commodity (str):
+            Name of the commodity.
+
+        date (date):
+            Date of the observation.
+
+        price (float):
+            Observed price of the commodity.
+
+        currency (str):
+            Currency in which the price is expressed.
+
+        units (str):
+            Units of the observed price.
+
+        source (Source):
+            Source of the price observation.
+    """
+
+    commodity: str
+    date: date
+    price: float = Field(gt=0)
+    currency: str = "USD"
+    units: str
+    source: Source
