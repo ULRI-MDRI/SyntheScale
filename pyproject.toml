@@ -27,6 +27,9 @@ dev = [
     "ruff>=0.8",
 ]
 
+ai = [
+    "openai>=2.0,<3.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
