@@ -25,10 +25,14 @@ to produce transparent, source-grounded feasibility assessments.
 
 ## External data setup
 
-SyntheScale uses the World Bank Pink Sheet monthly commodity-price
-dataset for commodity-price and market-volatility analysis.
+SyntheScale uses:
 
-Download and validate the required datasets:
+- World Bank Pink Sheet monthly commodity prices for market-price and
+  volatility analysis.
+- USGS Mineral Commodity Summaries 2026 structured data for mineral
+  availability and supply-chain analysis.
+
+Download and validate all supported datasets:
 
 ```bash
 python scripts/download_data.py
