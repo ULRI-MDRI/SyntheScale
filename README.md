@@ -5,7 +5,7 @@
 Given a computationally proposed or experimentally developed material,
 production location, target scale, and synthesis route, SyntheScale asks:
 
-> **What are the major barri**s to producing this material at larger scale,
+> **What are the major barriers to producing this material at larger scale,
 > what evidence supports those conclusions, and what should be validated
 > next?**
 
