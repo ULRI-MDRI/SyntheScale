@@ -132,3 +132,25 @@ def test_usgs_preserves_nonnumeric_zinc_value(
     assert ores.raw_value == "E"
     assert ores.value is None
     assert ores.value_qualifier is None
+
+
+@pytest.mark.parametrize(
+    ("query", "expected"),
+    [
+        (" aluminum ", "Aluminum"),
+        (" GOLD ", "Gold"),
+        (" Phosphate \t rock ", "Phosphate Rock"),
+        ("Phosphate rocck", "Phosphate Rock"),
+        ("silicon", "Silicon"),
+        ("silicone", None),
+        ("nickel", None),
+        ("", None),
+    ],
+)
+def test_usgs_resolves_loaded_catalog(local_usgs_provider, query, expected):
+    assert local_usgs_provider.resolve_commodity_name(query) == expected
+    if expected is not None:
+        records = local_usgs_provider.get_records(expected)
+        assert len(records) == 1
+        assert records[0].commodity == expected
+        assert records[0].value == 1_000

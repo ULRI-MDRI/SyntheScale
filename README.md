@@ -166,6 +166,33 @@ For example, the prototype can identify:
 Importantly, an aluminum commodity reference price is treated as an
 **upstream market indicator**, not as the purchase price of sodium aluminate.
 
+### Commodity name matching
+
+Chemical-to-commodity exposure mapping remains curated. Once an upstream
+commodity is identified, each provider resolves its name independently against
+the commodities available in its loaded dataset:
+
+1. Use an existing curated alias, provided its target exists in that dataset.
+2. Try an exact catalog match, ignoring case and surrounding/repeated whitespace.
+3. Try conservative full-name fuzzy matching using Python's `difflib`.
+4. Return `None` for missing, weak, or ambiguous matches; the assessment records
+   the existing provider-specific data gap rather than guessing.
+
+Fuzzy matching requires a similarity score of at least 0.95 and a lead of at
+least 0.05 over the next candidate. It also preserves word count and rejects
+changes to short tokens (three characters or fewer), protecting short grade
+and region identifiers. These scores are lexical heuristics, not probabilities
+or proof of chemical equivalence. For example, `Phosphate rocck` can resolve to
+`Phosphate rock`, but `silicone` does not resolve to `Silicon`.
+An alias whose target is absent remains unresolved; it is not remapped to a
+different commodity. Catalog names that differ only in case or whitespace
+are treated as ambiguous rather than chosen arbitrarily.
+
+The matcher uses no LLM or external API and returns the dataset's original
+commodity name. Semantic synonyms still require reviewed aliases, and matching
+a catalog name does not guarantee that all requested price or supply statistics
+are available. This step does not extend chemical-to-commodity coverage.
+
 ## Quick start
 
 ### 1. Clone the repository
@@ -241,6 +268,12 @@ The prototype UI provides a guided form for entering:
 - chemical inputs and their process roles.
 
 The form is converted internally into a typed `ScaleUpScenario`.
+
+Chemical inputs must resolve in PubChem before assessment proceeds. If a name
+is not found, the app identifies the unresolved input and asks you to check its
+spelling or enter a recognized name or CAS number. It does not automatically
+substitute a similar chemical or continue with an unidentified input. This is
+separate from the downstream commodity-name matching described above.
 
 Results include:
 

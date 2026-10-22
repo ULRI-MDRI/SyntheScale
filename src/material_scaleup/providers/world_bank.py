@@ -8,6 +8,7 @@ import pandas as pd
 
 from material_scaleup.models.cost import CommodityPriceObservation
 from material_scaleup.models.source import Source
+from material_scaleup.resolvers.commodity_name import resolve_commodity_name
 
 __all__ = [
     "WorldBankCommodityProvider",
@@ -243,6 +244,11 @@ class WorldBankCommodityProvider:
 
         Returns:
             str | None:
-                The corresponding World Bank series name if found, otherwise None.
+                The catalog series name found by alias, exact lookup, or conservative
+                fuzzy matching; None for missing, weak, or ambiguous matches.
         """
-        return self.COMMODITY_ALIASES.get(commodity.casefold().strip())
+        return resolve_commodity_name(
+            commodity,
+            commodities=self.commodities(),
+            aliases=self.COMMODITY_ALIASES,
+        )

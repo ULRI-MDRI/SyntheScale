@@ -137,3 +137,24 @@ def test_world_bank_history_converts_to_evidence(
     assert AssessmentCategory.MARKET_VOLATILITY in categories
 
     assert all(item.source is not None for item in evidence)
+
+
+@pytest.mark.parametrize(
+    ("query", "expected"),
+    [
+        (" aluminum ", "Aluminum"),
+        (" GOLD ", "Gold"),
+        (" Phosphate \t rock ", "Phosphate rock"),
+        ("Phosphate rocck", "Phosphate rock"),
+        ("silicon", None),
+        ("silicone", None),
+        ("copper", None),
+        ("", None),
+    ],
+)
+def test_world_bank_resolves_loaded_catalog(local_world_bank_provider, query, expected):
+    assert local_world_bank_provider.resolve_commodity_name(query) == expected
+    if expected is not None:
+        history = local_world_bank_provider.get_price_history(expected)
+        assert len(history) == 3
+        assert all(observation.commodity == expected for observation in history)

@@ -8,6 +8,17 @@ from material_scaleup.models.chemical import ChemicalIdentity
 from material_scaleup.providers.base import ChemicalIdentityProvider
 
 
+class ChemicalNotFoundError(LookupError):
+    """PubChem could not resolve the submitted chemical identifier."""
+
+    def __init__(self, identifier: str) -> None:
+        super().__init__(
+            f"PubChem could not find a compound for {identifier!r}. "
+            "Check the spelling or try a recognized chemical name or CAS number. "
+            "No chemical has been substituted; the assessment was not completed."
+        )
+
+
 class PubChemProvider(ChemicalIdentityProvider):
     """Resolve chemical identities using PubChem PUG REST."""
 
@@ -48,6 +59,8 @@ class PubChemProvider(ChemicalIdentityProvider):
         )
 
         response = requests.get(url, timeout=self.timeout)
+        if response.status_code == 404:
+            raise ChemicalNotFoundError(identifier)
         response.raise_for_status()
 
         payload = response.json()
@@ -55,7 +68,7 @@ class PubChemProvider(ChemicalIdentityProvider):
         properties = payload["PropertyTable"]["Properties"]
 
         if not properties:
-            raise LookupError(f"PubChem returned no compound for {identifier!r}.")
+            raise ChemicalNotFoundError(identifier)
 
         record = properties[0]
 
