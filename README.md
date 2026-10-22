@@ -412,5 +412,3 @@ SYNTHE_SCALE_MODEL
 
 Downloaded datasets and generated assessment runs are intentionally excluded
 from version control.
-
-See [SECURITY.md](SECURITY.md) for additional information.
