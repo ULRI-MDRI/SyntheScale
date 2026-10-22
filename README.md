@@ -414,8 +414,3 @@ Downloaded datasets and generated assessment runs are intentionally excluded
 from version control.
 
 See [SECURITY.md](SECURITY.md) for additional information.
-
-## License
-
-Add the appropriate project license before distribution outside the
-hackathon/team environment.
