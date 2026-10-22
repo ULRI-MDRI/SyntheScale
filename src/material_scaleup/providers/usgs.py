@@ -42,6 +42,15 @@ class USGSCommodityProvider:
         "latin-1",
     )
 
+    COMMODITY_ALIASES = {
+        "aluminum": "Aluminum",
+        "cobalt": "Cobalt",
+        "nickel": "Nickel",
+        "zinc": "Zinc",
+        "phosphate rock": "Phosphate Rock",
+        "silicon": "Silicon",
+    }
+
     def __init__(self, path: str | Path) -> None:
         self.path = Path(path)
 
@@ -497,3 +506,17 @@ class USGSCommodityProvider:
             raise ValueError(f"USGS source row is missing {field_name}.")
 
         return text
+
+    def resolve_commodity_name(self, commodity: str) -> str | None:
+        """
+        Resolve a SyntheScale commodity to a USGS commodity.
+
+        Args:
+            commodity (str):
+                The SyntheScale commodity name to resolve.
+
+        Returns:
+            str | None:
+                The corresponding USGS commodity name if found, otherwise None.
+        """
+        return self.COMMODITY_ALIASES.get(commodity.casefold().strip())

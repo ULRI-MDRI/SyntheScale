@@ -31,6 +31,15 @@ class WorldBankCommodityProvider:
         "units",
     ]
 
+    COMMODITY_ALIASES = {
+        "aluminum": "Aluminum",
+        "copper": "Copper",
+        "nickel": "Nickel",
+        "zinc": "Zinc",
+        "phosphate rock": "Phosphate rock",
+        "urea": "Urea",
+    }
+
     def __init__(self, path: str | Path) -> None:
         self.path = Path(path)
 
@@ -223,3 +232,17 @@ class WorldBankCommodityProvider:
             units = units[1:-1]
 
         return units
+
+    def resolve_commodity_name(self, commodity: str) -> str | None:
+        """
+        Resolve a SyntheScale commodity to a World Bank series.
+
+        Args:
+            commodity (str):
+                The SyntheScale commodity name to resolve.
+
+        Returns:
+            str | None:
+                The corresponding World Bank series name if found, otherwise None.
+        """
+        return self.COMMODITY_ALIASES.get(commodity.casefold().strip())
