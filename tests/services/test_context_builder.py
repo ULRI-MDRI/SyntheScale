@@ -194,5 +194,7 @@ def test_context_builder_resolves_provider_catalogs_offline(
             for item in context.evidence
         )
 
-    assert len(context.data_gaps) == int(world_bank_name is None) + int(usgs_name is None)
+    commodity_gaps = [gap for gap in context.data_gaps if not gap.startswith("test precursor:")]
+    assert len(commodity_gaps) == int(world_bank_name is None) + int(usgs_name is None)
+    assert context.domestic_production[0].status == "not_checked"
     assert any("lexical matching" in assumption for assumption in context.assumptions)

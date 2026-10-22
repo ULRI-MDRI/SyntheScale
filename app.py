@@ -41,6 +41,7 @@ from material_scaleup.services.llm_context_builder import (
 )
 from material_scaleup.ui.availability import (
     render_availability_lookup,
+    render_domestic_production,
     render_trade_results,
     render_trade_selection,
     select_country,
@@ -427,6 +428,9 @@ def render_evidence(
     """Render compact evidence supplied to the LLM."""
 
     st.header("Evidence & sources")
+    if llm_context.domestic_production:
+        st.subheader("Country-specific domestic production context")
+        render_domestic_production(llm_context.domestic_production)
 
     trade_results = (
         llm_context.trade_availability if trade_availability is None else trade_availability

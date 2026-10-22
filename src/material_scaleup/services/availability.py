@@ -1,21 +1,30 @@
 from datetime import UTC, date, datetime
 
 from material_scaleup.calculations.trade import summarize_trade_year
+from material_scaleup.models.chemical import ChemicalIdentity
 from material_scaleup.models.source import Source
 from material_scaleup.models.trade import AvailabilityResult, TradeCountry, TradeMatch, TradeYear
 from material_scaleup.providers.comtrade import ComtradeError, ComtradeProvider
+from material_scaleup.services.domestic import DomesticProductionService
 
 TRADE_LIMITATIONS = (
     "Historical trade is not live inventory, spare capacity or verified exact-grade availability. "
     "Low imports may reflect domestic production. Import unit values are not supplier quotations "
-    "or delivered procurement costs. Domestic supply, restrictions and logistics were not checked. "
+    "or delivered procurement costs. Direct precursor production, restrictions and logistics "
+    "were not checked. Optional domestic observations are upstream context only. "
     "Do not assign a numerical availability or supply-chain score from these pilot indicators."
 )
 
 
 class AvailabilityService:
-    def __init__(self, provider: ComtradeProvider) -> None:
+    def __init__(
+        self,
+        provider: ComtradeProvider,
+        *,
+        domestic_service: DomesticProductionService | None = None,
+    ) -> None:
         self.provider = provider
+        self.domestic_service = domestic_service
 
     def lookup(
         self, country: TradeCountry, match: TradeMatch, *, confirmed: bool = False
@@ -37,6 +46,12 @@ class AvailabilityService:
             ),
             data_gaps=[TRADE_LIMITATIONS],
         )
+        if self.domestic_service is not None:
+            domestic = self.domestic_service.lookup(
+                ChemicalIdentity(name=match.requested_material), country.name
+            )
+            result.domestic_production = domestic
+            result.domestic_supply_status = domestic.status
         try:
             years = self.provider.available_years(country)
         except ComtradeError as error:

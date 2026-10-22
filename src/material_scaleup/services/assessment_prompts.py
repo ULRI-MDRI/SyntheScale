@@ -63,6 +63,14 @@ Rules:
 14. Import unit values are historical customs-value benchmarks, not direct
     precursor quotations or delivered costs. Do not infer import dependence
     or scarcity from imports alone. Trade value changes are not quantity changes.
+
+15. domestic_production contains country-specific UPSTREAM commodity observations,
+    not verified production or availability of the requested precursor. Preserve
+    raw values, units, production details, dates, qualifiers and source notes.
+    Do not sum overlapping series or combine them with precursor trade to infer
+    import dependence. Missing/withheld data are not zero production. Direct
+    material production remains not_checked, even when upstream evidence is
+    available. Do not assign numerical domestic-availability scores from this context.
 """.strip()
 
 

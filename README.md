@@ -357,9 +357,9 @@ the toggle off. You can turn it off even after a failure to continue assessing.
 - Value trends are nominal USD changes, not quantity trends or price indices.
   Low imports do not establish scarcity or import dependence; domestic production
   and existing demand may be significant.
-- Domestic supply, verified restrictions and logistics are explicitly **not
-  checked** by this first release. Existing USGS upstream evidence remains
-  separate; it does not prove direct precursor availability.
+- Direct precursor production, verified restrictions and logistics remain **not
+checked**. Phase 4A adds optional country-specific upstream USGS production
+context, described below; it does not prove direct precursor availability.
 - API responses are cached in memory for up to one hour, bounded to 256 entries
   per provider. The displayed timestamp is lookup time. Each material requests at
   most five annual record counts and five annual datasets, plus shared reference
@@ -400,6 +400,38 @@ For a missing key or HTTP 401/403, export `UN_COMTRADE_API_KEY` in the same
 terminal used to start Streamlit, then restart Streamlit. Exporting a variable
 does not update an already-running process or other terminals. Never paste the
 key into diagnostic output.
+
+### Phase 4A: domestic upstream-production context
+
+The scale-up report now includes country-specific USGS production context for
+each synthesis input with a reviewed upstream mapping, even when Comtrade is
+disabled. The standalone trade lookup includes the same context when the local
+USGS CSV is present. A missing optional CSV does not block trade lookup; its
+domestic evidence is marked `not_checked`. A malformed source is reported as an
+error rather than interpreted as zero production.
+
+The initial pilot reuses curated mappings such as sodium aluminate → aluminum
+and sodium silicate → silicon. There is no reviewed USGS production mapping for
+sodium hydroxide or direct urea production in this increment. No fuzzy material
+or country substitutions are used. `USA` is explicitly mapped to `United States`;
+otherwise only exact country names and a small explicit alias list are accepted.
+Territories are not assigned their parent country's production.
+
+For each mapped commodity, the service preserves all production observations for
+the latest available completed year for the selected country: raw published values,
+units, production detail, report section, qualifiers, notes and USGS source/DOI.
+Series are never summed, and world totals/other-country production are not used as
+substitutes. Withheld values stay withheld; older observations carry a freshness
+warning. Data gaps and source scope are included in the AI context and the
+**Evidence & sources** view, as well as standalone JSON exports.
+
+**`available` describes availability of upstream evidence, not availability of the
+material.** `not_available` means no usable numeric upstream record was found in
+the supported source, not zero production. `not_checked` covers missing sources
+and unreviewed mappings. Direct precursor/grade production remains `not_checked`
+for every material in this release. These records cannot establish supplier
+capacity, live inventory, import dependence or procurement suitability. Numeric
+domestic-availability scoring, restrictions and logistics remain out of scope.
 
 ## Streamlit interface
 

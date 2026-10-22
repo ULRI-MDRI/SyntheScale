@@ -5,6 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from material_scaleup.models.domestic import DomesticProductionResult
 from material_scaleup.models.source import Source
 
 
@@ -74,6 +75,9 @@ class AvailabilityResult(BaseModel):
     data_gaps: list[str] = Field(default_factory=list)
     score: None = None
     score_status: Literal["not_scored"] = "not_scored"
-    domestic_supply_status: Literal["not_checked"] = "not_checked"
+    domestic_supply_status: Literal["not_checked", "available", "not_available", "error"] = (
+        "not_checked"
+    )
+    domestic_production: DomesticProductionResult | None = None
     restrictions_status: Literal["not_checked"] = "not_checked"
     logistics_status: Literal["not_checked"] = "not_checked"

@@ -4,6 +4,7 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+from material_scaleup.models.domestic import DomesticProductionResult
 from material_scaleup.models.trade import AvailabilityResult
 
 __all__ = [
@@ -318,5 +319,6 @@ class LLMContext(BaseModel):
     markets: list[CommodityMarketSummary] = Field(default_factory=list)
     supply: list[CommoditySupplySummary] = Field(default_factory=list)
     trade_availability: list[AvailabilityResult] = Field(default_factory=list)
+    domestic_production: list[DomesticProductionResult] = Field(default_factory=list)
     assumptions: list[str] = Field(default_factory=list)
     data_gaps: list[str] = Field(default_factory=list)

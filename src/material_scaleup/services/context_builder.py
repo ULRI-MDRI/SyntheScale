@@ -17,6 +17,7 @@ from material_scaleup.providers.pubchem_safety import PubChemSafetyProvider
 from material_scaleup.providers.usgs import USGSCommodityProvider
 from material_scaleup.providers.world_bank import WorldBankCommodityProvider
 from material_scaleup.resolvers.commodity import CommodityResolver
+from material_scaleup.services.domestic import DomesticProductionService
 
 __all__ = [
     "AssessmentContextBuilder",
@@ -75,6 +76,52 @@ class AssessmentContextBuilder:
         data_gaps: list[str] = []
         trade_results = trade_availability or []
         route_inputs = scenario.synthesis_route.inputs if scenario.synthesis_route else []
+        domestic_results = []
+        if scenario.production_location is not None:
+            domestic_service = DomesticProductionService(self.usgs_provider)
+            seen_materials: set[str] = set()
+            for process_input in route_inputs:
+                chemical = process_input.chemical
+                identity = chemical.model_dump_json()
+                if identity in seen_materials:
+                    continue
+                seen_materials.add(identity)
+                domestic = domestic_service.lookup(chemical, scenario.production_location.country)
+                domestic_results.append(domestic)
+                data_gaps.extend(
+                    f"{domestic.material}: {limitation}" for limitation in domestic.limitations
+                )
+                for observation in domestic.observations:
+                    evidence.append(
+                        Evidence(
+                            category=AssessmentCategory.AVAILABILITY,
+                            claim=(
+                                f"Upstream {observation.commodity} production in "
+                                f"{observation.country}; not {domestic.material} production"
+                            ),
+                            reported_value=(
+                                EvidenceValue(value=observation.value, units=observation.units)
+                                if observation.value is not None else None
+                            ),
+                            source=observation.source,
+                            scope=EvidenceScope(
+                                country=observation.country,
+                                effective_date=(
+                                    date(observation.year, 1, 1) if observation.year else None
+                                ),
+                            ),
+                            notes=" ".join(domestic.limitations),
+                            metadata={
+                                "observation_type": "domestic_upstream_production",
+                                "material": domestic.material,
+                                "commodity": observation.commodity,
+                                "raw_value": observation.raw_value,
+                                "raw_year": observation.raw_year,
+                                "statistic_detail": observation.statistic_detail,
+                                "relationship": "upstream",
+                            },
+                        )
+                    )
         route_names = {
             name.strip().casefold()
             for process_input in route_inputs
@@ -170,6 +217,7 @@ class AssessmentContextBuilder:
                 assumptions=assumptions,
                 data_gaps=data_gaps,
                 trade_availability=trade_results,
+                domestic_production=domestic_results,
             )
 
         assessed_commodities: set[str] = set()
@@ -234,6 +282,7 @@ class AssessmentContextBuilder:
             assumptions=assumptions,
             data_gaps=self._deduplicate(data_gaps),
             trade_availability=trade_results,
+            domestic_production=domestic_results,
         )
 
     def _add_world_bank_evidence(

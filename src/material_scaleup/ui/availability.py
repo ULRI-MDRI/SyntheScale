@@ -1,9 +1,11 @@
 import hashlib
 import json
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 
+from material_scaleup.models.domestic import DomesticProductionResult
 from material_scaleup.models.trade import (
     AvailabilityResult,
     TradeCountry,
@@ -11,8 +13,63 @@ from material_scaleup.models.trade import (
     TradeProduct,
 )
 from material_scaleup.providers.comtrade import ComtradeError, ComtradeProvider
+from material_scaleup.providers.usgs import USGSCommodityProvider
 from material_scaleup.resolvers.trade import find_trade_matches
 from material_scaleup.services.availability import TRADE_LIMITATIONS, AvailabilityService
+from material_scaleup.services.domestic import DomesticProductionService
+
+
+def get_domestic_service() -> DomesticProductionService:
+    path = (
+        Path(__file__).resolve().parents[3]
+        / "data/raw/usgs/mcs2026/MCS2026_Commodities_Data.csv"
+    )
+    if not path.exists():
+        return DomesticProductionService(None)
+    try:
+        return DomesticProductionService(USGSCommodityProvider(path))
+    except (OSError, ValueError) as error:
+        return DomesticProductionService(
+            None, source_error=f"USGS domestic-production dataset could not be loaded: {error}"
+        )
+
+
+def render_domestic_production(results: list[DomesticProductionResult]) -> None:
+    for result in results:
+        with st.container(border=True):
+            st.markdown(f"**Domestic upstream context: {result.material}**")
+            st.write(
+                f"Country: {result.requested_country}; source country: "
+                f"{result.source_country or 'unresolved/not checked'}. "
+                f"Upstream evidence: {result.status}. "
+                f"Direct material production: {result.direct_material_status}."
+            )
+            st.caption(f"Checked {result.checked_at.isoformat()}")
+            if result.observations:
+                st.dataframe(
+                    [
+                        {
+                            "Commodity": row.commodity,
+                            "Country": row.country,
+                            "Year": row.raw_year,
+                            "Published value": row.raw_value,
+                            "Units": row.units,
+                            "Production detail": row.statistic_detail,
+                            "Section": row.section,
+                            "Notes": row.notes,
+                            "Other notes": row.other_notes,
+                            "Qualifier": row.value_qualifier,
+                        }
+                        for row in result.observations
+                    ],
+                    hide_index=True,
+                )
+                for url in sorted({
+                    row.source.url for row in result.observations if row.source.url
+                }):
+                    st.markdown(f"[USGS production source]({url})")
+            for limitation in result.limitations:
+                st.info(limitation)
 
 
 @st.cache_resource
@@ -96,6 +153,8 @@ def render_trade_results(results: list[AvailabilityResult]) -> None:
                 )
             for gap in result.data_gaps:
                 st.info(gap)
+            if result.domestic_production is not None:
+                render_domestic_production([result.domestic_production])
             st.markdown(f"[UN Comtrade source]({result.source.url})")
 
 
@@ -164,7 +223,9 @@ def render_trade_selection(
         key=f"{key}_retrieve",
         disabled=not selected or not all(confirmations),
     ):
-        service = AvailabilityService(get_trade_provider())
+        service = AvailabilityService(
+            get_trade_provider(), domestic_service=get_domestic_service()
+        )
         results = []
         for index, match in enumerate(selected):
             with st.spinner(f"Retrieving {index + 1}/{len(selected)}: {match.requested_material}"):

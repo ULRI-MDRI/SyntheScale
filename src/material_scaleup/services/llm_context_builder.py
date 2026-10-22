@@ -65,6 +65,7 @@ def build_llm_context(context: AssessmentContext) -> LLMContext:
         safety=safety,
         markets=_build_market_summaries(context.evidence),
         supply=_build_supply_summaries(context.evidence),
+        domestic_production=context.domestic_production,
         trade_availability=[
             result.model_copy(
                 update={

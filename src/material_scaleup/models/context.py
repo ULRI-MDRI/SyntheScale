@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel, Field
 
+from .domestic import DomesticProductionResult
 from .evidence import Evidence
 from .scenario import ScaleUpScenario
 from .trade import AvailabilityResult
@@ -34,3 +35,4 @@ class AssessmentContext(BaseModel):
     assumptions: list[str] = Field(default_factory=list)
     data_gaps: list[str] = Field(default_factory=list)
     trade_availability: list[AvailabilityResult] = Field(default_factory=list)
+    domestic_production: list[DomesticProductionResult] = Field(default_factory=list)
